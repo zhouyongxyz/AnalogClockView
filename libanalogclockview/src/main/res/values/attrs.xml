@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="AnalogClockView">
+        <attr name="acv_style_color" format="dimension"/>
+        <attr name="acv_second_color" format="color"/>
+    </declare-styleable>
+</resources>
