@@ -3,7 +3,7 @@ AnalogClockView library.
 
 #Demo picture
 
-<img src="https://raw.githubusercontent.com/zhouyongxyz/AnalogClockView/master/circleimageview_demo.png"/>
+<img src="https://raw.githubusercontent.com/zhouyongxyz/AnalogClockView/master/Screenshot_19700123-222010.png"/>
 
 #AnalogClockView Layout.xml
 ```xml
