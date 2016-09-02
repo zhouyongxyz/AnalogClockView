@@ -10,17 +10,13 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PaintFlagsDrawFilter;
-import android.graphics.RectF;
 import android.os.Handler;
 import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.util.AttributeSet;
 import android.view.View;
 
-import java.text.DateFormatSymbols;
-import java.util.Calendar;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -48,8 +44,6 @@ public class AnalogClockView extends View {
     private float mHour;
     private boolean mChanged;
     private final Context mContext;
-    private String mTimeZoneId;
-    private boolean mNoSeconds = false;
 
     private final int mStyleColor;
     private final int mSecondColor;
@@ -160,40 +154,15 @@ public class AnalogClockView extends View {
         mCurrentView.drawHour(canvas, x, y, w, h);
         mCurrentView.drawMinute(canvas, x, y, w, h);
         mCurrentView.drawSecond(canvas, x, y, w, h);
-        //drawDialPlate(canvas, x, y, w-30, h-30);
-        /*if (mDotRadius > 0f && mDotPaint != null) {
-            canvas.drawCircle(x, y - (h / 2) + mDotOffset, mDotRadius, mDotPaint);
-        }
-
-        if(getIsEnglish()){
-            canvas.drawText(getAmPmString(), 0.9f * x, 1.67f * y, mTextPaint);
-        }else if(IsChinese()){
-            canvas.drawText(getAmPmString(), 0.88f * x, 1.67f * y, mTextPaint);
-        }else{
-            canvas.drawText(getAmPmString(), 0.76f * x, 1.67f * y, mTextPaint);
-        }
-
-        drawDialElements(canvas, x, y,w-30,h-30, mHour / 12.0f * 360.0f, 1);
-        drawDialElements(canvas, x, y,w-30,h-30, mMinutes / 60.0f * 360.0f, 2);
-        if (!mNoSeconds) {
-            drawDialElements(canvas,x,y,w-30,h-30,mSeconds / 60.0f *2*(float)Math.PI,3);
-        }
-        */
     }
 
     private void onTimeChanged() {
         mCalendar.setToNow();
 
-        if (mTimeZoneId != null) {
-            mCalendar.switchTimezone(mTimeZoneId);
-        }
-
         int hour = mCalendar.hour;
         int minute = mCalendar.minute;
         int second = mCalendar.second;
-        //      long millis = System.currentTimeMillis() % 1000;
-
-        mSeconds = second;//(float) ((second * 1000 + millis) / 166.666);
+        mSeconds = second;
         mMinutes = minute + second / 60.0f;
         mHour = hour + mMinutes / 60.0f;
         mChanged = true;
@@ -228,102 +197,6 @@ public class AnalogClockView extends View {
         String contentDescription = DateUtils.formatDateTime(mContext,
                 time.toMillis(false), flags);
         setContentDescription(contentDescription);
-    }
-
-    public void setTimeZone(String id) {
-        mTimeZoneId = id;
-        onTimeChanged();
-    }
-
-    public void enableSeconds(boolean enable) {
-        mNoSeconds = !enable;
-    }
-
-    private boolean getIsEnglish()
-    {
-        return Locale.getDefault().getLanguage().equals(Locale.ENGLISH.getLanguage());
-    }
-    private String getAmPmString(){
-        String[] ampms = new DateFormatSymbols().getAmPmStrings();
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(System.currentTimeMillis());
-        int ampm = calendar.get(Calendar.AM_PM);
-        return (ampm == 0)?ampms[0]:ampms[1];
-    }
-
-    private boolean IsChinese()
-    {
-        return Locale.getDefault().getLanguage().equals(Locale.CHINESE.getLanguage());
-    }
-
-    //draw the Dial Plate
-    private void drawDialPlate(Canvas canvas,int x,int y,int w,int h)
-    {
-        float radius = 10.0f;
-        Paint paint = new Paint();
-        paint.setARGB(255,255, 255,255);
-
-        int N = 60;
-        double delta = 2*Math.PI/N;
-        float cx,cy;
-        // draw points
-        for(int i = 0; i < N; i++)
-        {
-            cx = w/2*(float)Math.cos(delta*i)+x;
-            cy = w/2*(float)Math.sin(delta*i)+y;
-            if(i%5==0)
-            {
-                paint.setARGB(255,255, 255,255);
-            }
-            else
-            {
-                paint.setARGB(40,255, 255,255);
-            }
-            canvas.drawCircle(cx, cy, radius,paint);
-        }
-        paint.setARGB(255,255, 255,255);
-        canvas.drawCircle(x,y, radius, paint);
-        // draw text
-        int offset = w/2 - 50;
-        x = x-15;
-        y = y+15;
-        canvas.drawText("12", x, y-offset, mTextPaint);
-        canvas.drawText("3", x+offset, y, mTextPaint);
-        canvas.drawText("6", x, y+offset, mTextPaint);
-        canvas.drawText("9", x-offset, y, mTextPaint);
-    }
-
-    private void drawDialElements(Canvas canvas,int x,int y,int w,int h,float angle ,int flag)
-    {
-        float radius = 12.0f;
-        Paint paint = new Paint();
-        paint.setAntiAlias(true);
-        float cx,cy;
-        if(flag == 3)
-        {
-            paint.setARGB(255,210,105,30);
-            cx = w/2*(float)Math.cos(angle)+x;
-            cy = w/2*(float)Math.sin(angle)+y;
-            canvas.drawCircle(cx, cy, radius,paint);
-        }
-        else if(flag == 2)
-        {
-            canvas.save();
-            canvas.rotate(angle-90, x, y);
-            paint.setARGB(255, 255, 255, 255);
-            RectF rect = new RectF(x+20, y - 5, x + 4*w/10, y + 5);
-            canvas.drawRoundRect(rect, 10, 10, paint);
-            canvas.restore();
-        }
-        else if(flag == 1)
-        {
-            canvas.save();
-            canvas.rotate(angle-90, x, y);
-            paint.setARGB(255, 255, 255, 255);
-            RectF rect = new RectF(x+20, y - 5, x + 3*w/10, y + 5);
-            canvas.drawRoundRect(rect, 10, 10, paint);
-            canvas.restore();
-        }
     }
 
     public void setViewMode(int mode) {
